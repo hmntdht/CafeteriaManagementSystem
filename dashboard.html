@@ -56,54 +56,131 @@
       color: #6c757d;
       font-size: 1.25rem;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+      .card-img-top {
+     height: 200px;
+     object-fit: cover;
+    border-radius: 0.5rem 0.5rem 0 0;
+    }
+ 
     }
   </style>
 </head>
 <body>
 
   <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <img src="images/logo.png" alt="Logo" />
-      </a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="#">Menu Items</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Category</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Orders</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Order Items</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">History</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Account</a>
-          </li>
-        </ul>
-      </div>
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="images/logo.png" alt="Logo" />
+      <span class="ms-2 fw-bold fs-4 text-primary">Nast Eat</span>
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="dashboard.html">Menu Items</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="category.html">Category</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Order Items</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">History</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Account</a>
+        </li>
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
 
   <main id="main-content">
-    <!-- Empty center content -->
+    <div class="container mt-4">
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    
+    <!-- Menu Item 1 -->
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <img src="images/samosa.jpeg" class="card-img-top" alt="Pizza">
+        <div class="card-body text-center">
+          <h5 class="card-title">Samosa</h5>
+          <p class="card-text">Rs. 250</p>
+          <button class="btn btn-primary">Order</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Item 2 -->
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <img src="images/chola.jpeg" class="card-img-top" alt="Momo">
+        <div class="card-body text-center">
+          <h5 class="card-title">Chola Samosa</h5>
+          <p class="card-text">Rs. 120</p>
+          <button class="btn btn-primary">Order</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Item 3 -->
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <img src="images/pakoda.jpeg" class="card-img-top" alt="Noodles">
+        <div class="card-body text-center">
+          <h5 class="card-title">Pakoda</h5>
+          <p class="card-text">Rs. 100</p>
+          <button class="btn btn-primary">Order</button>
+        </div>
+      </div>
+    </div>
+
+   <div class="col">
+      <div class="card h-100 shadow-sm">
+        <img src="images/samosa.jpeg" class="card-img-top" alt="Pizza">
+        <div class="card-body text-center">
+          <h5 class="card-title">Samosa</h5>
+          <p class="card-text">Rs. 250</p>
+          <button class="btn btn-primary">Order</button>
+        </div>
+      </div>
+    </div>
+
+     <div class="col">
+      <div class="card h-100 shadow-sm">
+        <img src="images/coke.jpg" class="card-img-top" alt="Pizza">
+        <div class="card-body text-center">
+          <h5 class="card-title">Coke</h5>
+          <p class="card-text">Rs. 250</p>
+          <button class="btn btn-primary">Order</button>
+        </div>
+      </div>
+    </div>
+
+     <div class="col">
+      <div class="card h-100 shadow-sm">
+        <img src="images/fanta .png" class="card-img-top" alt="Pizza">
+        <div class="card-body text-center">
+          <h5 class="card-title">Fanta</h5>
+          <p class="card-text">Rs. 250</p>
+          <button class="btn btn-primary">Order</button>
+        </div>
+      </div>
+    </div>
+
+
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
