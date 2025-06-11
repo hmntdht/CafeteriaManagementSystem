@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Items</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      background: #f8f9fa;
+    }
+
+    .navbar-custom {
+      background: linear-gradient(135deg, #d6eaff, #f0fbff);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .navbar-custom .navbar-brand img {
+      height: 50px;
+      width: auto;
+      object-fit: contain;
+    }
+    .navbar-custom .nav-link {
+      color: #555;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      margin-right: 1rem;
+    }
+    .navbar-custom .nav-link:hover,
+    .navbar-custom .nav-link:focus {
+      background-color: rgba(0, 123, 255, 0.15);
+      color: #007bff;
+    }
+    .navbar-custom .nav-link.active {
+      background-color: rgba(0, 123, 255, 0.25);
+      color: #007bff;
+      font-weight: 600;
+    }
+    .navbar-custom .navbar-toggler {
+      border-color: rgba(0, 123, 255, 0.5);
+    }
+    .navbar-custom .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml;charset=utf8,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba%280%2c 123%2c 255%2c 1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    #main-content {
+      padding: 2rem;
+      padding-top: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .order-container {
+      width: 100%;
+      max-width: 600px;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .order-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #0d6efd;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .qty-controls button {
+      padding: 0.25rem 0.6rem;
+      font-size: 1rem;
+    }
+
+    .total-section {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #212529;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="images/logo.png" alt="Logo" />
+        <span class="ms-2 fw-bold fs-4 text-primary">Nast Eat</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard.html">Menu Items</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="category.html">Category</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="order_items.html">Order Items</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">History</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Account</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main-content">
+    <div class="order-container">
+      <div class="order-title">Your Order</div>
+      <ul id="order-list" class="list-group mb-3">
+        <!-- Items will be injected here -->
+      </ul>
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div id="total-amount" class="total-section">Total: Rs. 0</div>
+        <button id="checkout-btn" class="btn btn-success ms-3" onclick="checkout()" disabled>Checkout</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const item = urlParams.get('item');
+    const price = parseFloat(urlParams.get('price'));
+
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+    // Add new item if passed from query
+    if (item && !isNaN(price)) {
+      const existingIndex = orders.findIndex(order => order.item === item);
+      if (existingIndex > -1) {
+        orders[existingIndex].quantity = (orders[existingIndex].quantity || 1) + 1;
+      } else {
+        orders.push({ item, price, quantity: 1 });
+      }
+      localStorage.setItem('orders', JSON.stringify(orders));
+    }
+
+    function renderOrders() {
+      const orderList = document.getElementById('order-list');
+      const totalAmountEl = document.getElementById('total-amount');
+      const checkoutBtn = document.getElementById('checkout-btn');
+
+      orderList.innerHTML = '';
+      let total = 0;
+
+      orders.forEach((order, index) => {
+        order.quantity = parseInt(order.quantity) || 1;
+        order.price = parseFloat(order.price) || 0;
+
+        total += order.price * order.quantity;
+
+        const li = document.createElement('li');
+        li.className = 'list-group-item order-item';
+        li.innerHTML = `
+          <span>${order.item} - Rs. ${order.price}</span>
+          <div class="qty-controls">
+            <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, -1)">−</button>
+            <span>${order.quantity}</span>
+            <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, 1)">+</button>
+          </div>
+        `;
+        orderList.appendChild(li);
+      });
+
+      totalAmountEl.textContent = `Total: Rs. ${total}`;
+      checkoutBtn.disabled = orders.length === 0;
+    }
+
+    function updateQuantity(index, change) {
+      orders[index].quantity += change;
+      if (orders[index].quantity <= 0) {
+        orders.splice(index, 1); // remove item
+      }
+      localStorage.setItem('orders', JSON.stringify(orders));
+      renderOrders();
+    }
+
+    function checkout() {
+      if (orders.length === 0) return;
+      alert('✅ Thank you for your order!\nRedirecting to payment...');
+      localStorage.removeItem('orders');
+      orders = [];
+      renderOrders();
+    }
+
+    renderOrders();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
