@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>History | Canteen Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      background: #f8f9fa;
+    }
+    .navbar-custom {
+      background: linear-gradient(135deg, #d6eaff, #f0fbff);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .navbar-custom .navbar-brand img {
+      height: 50px;
+      width: auto;
+      object-fit: contain;
+    }
+    .navbar-custom .nav-link {
+      color: #555;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      margin-right: 1rem;
+    }
+    .navbar-custom .nav-link:hover,
+    .navbar-custom .nav-link:focus {
+      background-color: rgba(0, 123, 255, 0.15);
+      color: #007bff;
+    }
+    .navbar-custom .nav-link.active {
+      background-color: rgba(0, 123, 255, 0.25);
+      color: #0056b3;
+      font-weight: 700;
+    }
+    #main-content {
+      padding: 2rem;
+      padding-top: 90px;
+      min-height: calc(100vh - 70px);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .card {
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="images/logo.png" alt="Logo" />
+        <span class="ms-2 fw-bold fs-4 text-primary">Nast Eat</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="dashboard.html">Menu Items</a></li>
+          <li class="nav-item"><a class="nav-link" href="category.html">Category</a></li>
+          <li class="nav-item"><a class="nav-link" href="order_items.html">Order Items</a></li>
+          <li class="nav-item"><a class="nav-link active" href="history.html">History</a></li>
+          <li class="nav-item"><a class="nav-link" href="account.html">Account</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main-content" class="container">
+    <h2 class="mb-4">Order & Transaction History</h2>
+
+    <!-- Past Orders -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Past Orders</h5>
+        <ul class="list-group" id="orderList">
+          <li class="list-group-item">Loading...</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Transaction Logs with filter -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="card-title mb-0">Transaction Logs</h5>
+          <select class="form-select w-auto" id="logFilter" onchange="filterLogs()">
+            <option value="7">Last 1 Week</option>
+            <option value="30" selected>Last 1 Month</option>
+          </select>
+        </div>
+        <ul class="list-group" id="transactionList">
+          <li class="list-group-item">Loading...</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Downloadable Receipts with filter -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="card-title mb-0">Downloadable Receipts</h5>
+          <select class="form-select w-auto" id="receiptFilter" onchange="filterReceipts()">
+            <option value="7">Last 1 Week</option>
+            <option value="30" selected>Last 1 Month</option>
+          </select>
+        </div>
+        <ul class="list-group" id="receiptList">
+          <li class="list-group-item">Loading...</li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let allOrders = [];
+    let allTransactions = [];
+    let allReceipts = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Mock data — replace with backend API calls!
+
+      allOrders = [
+        { item: "Samosa", date: "2025-06-20", time: "10:30 AM" },
+        { item: "Chola Samosa", date: "2025-06-22", time: "01:45 PM" }
+      ];
+      allTransactions = [
+        { amount: 250, date: "2025-06-20" },
+        { amount: 120, date: "2025-06-22" },
+        { amount: 300, date: "2025-06-01" }
+      ];
+      allReceipts = [
+        { file: "receipt_20250620.pdf", url: "#", date: "2025-06-20" },
+        { file: "receipt_20250622.pdf", url: "#", date: "2025-06-22" },
+        { file: "receipt_20250601.pdf", url: "#", date: "2025-06-01" }
+      ];
+
+      renderOrders();
+      filterLogs();
+      filterReceipts();
+    });
+
+    function renderOrders() {
+      const container = document.getElementById("orderList");
+      if (allOrders.length === 0) {
+        container.innerHTML = '<li class="list-group-item text-muted">No past orders found.</li>';
+        return;
+      }
+      container.innerHTML = allOrders.map(
+        o => `<li class="list-group-item">${o.item} - ${o.date} at ${o.time}</li>`
+      ).join('');
+    }
+
+    function filterLogs() {
+      const days = parseInt(document.getElementById("logFilter").value);
+      const now = new Date();
+      const cutoff = new Date(now);
+      cutoff.setDate(now.getDate() - days);
+
+      const filtered = allTransactions.filter(tx => new Date(tx.date) >= cutoff);
+      const container = document.getElementById("transactionList");
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<li class="list-group-item text-muted">No transactions in this period.</li>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(
+        tx => `<li class="list-group-item">Rs. ${tx.amount} paid on ${tx.date}</li>`
+      ).join('');
+    }
+
+    function filterReceipts() {
+      const days = parseInt(document.getElementById("receiptFilter").value);
+      const now = new Date();
+      const cutoff = new Date(now);
+      cutoff.setDate(now.getDate() - days);
+
+      const filtered = allReceipts.filter(r => new Date(r.date) >= cutoff);
+      const container = document.getElementById("receiptList");
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<li class="list-group-item text-muted">No receipts in this period.</li>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(
+        r => `<li class="list-group-item"><a href="${r.url}" download>${r.file}</a></li>`
+      ).join('');
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
