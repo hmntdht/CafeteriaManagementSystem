@@ -1,0 +1,42 @@
+body, html {
+      height: 100%;
+      margin: 0;
+      background: #f8f9fa;
+    }
+    .navbar-custom {
+      background: linear-gradient(135deg, #d6eaff, #f0fbff);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .navbar-custom .navbar-brand img {
+      height: 50px;
+      width: auto;
+      object-fit: contain;
+    }
+    .navbar-custom .nav-link {
+      color: #555;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      margin-right: 1rem;
+    }
+    .navbar-custom .nav-link:hover,
+    .navbar-custom .nav-link:focus {
+      background-color: rgba(0, 123, 255, 0.15);
+      color: #007bff;
+    }
+    .navbar-custom .nav-link.active {
+      background-color: rgba(0, 123, 255, 0.25);
+      color: #0056b3;
+      font-weight: 700;
+    }
+    #main-content {
+      padding: 2rem;
+      padding-top: 90px;
+      min-height: calc(100vh - 70px);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .card {
+      max-width: 600px;
+      margin: 2rem auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }

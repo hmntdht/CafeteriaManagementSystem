@@ -1,0 +1,65 @@
+body, html {
+      height: 100%;
+      margin: 0;
+      background: #f8f9fa;
+    }
+    .navbar-custom {
+      background: linear-gradient(135deg, #d6eaff, #f0fbff);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .navbar-custom .navbar-brand img {
+      height: 50px;
+      width: auto;
+      object-fit: contain;
+    }
+    .navbar-custom .nav-link {
+      color: #555;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      margin-right: 1rem;
+    }
+    .navbar-custom .nav-link:hover,
+    .navbar-custom .nav-link:focus {
+      background-color: rgba(0, 123, 255, 0.15);
+      color: #007bff;
+    }
+    .navbar-custom .nav-link.active {
+      background-color: rgba(0, 123, 255, 0.25);
+      color: #0056b3;
+      font-weight: 700;
+    }
+    .navbar-custom .navbar-toggler {
+      border-color: rgba(0, 123, 255, 0.5);
+    }
+    .navbar-custom .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml;charset=utf8,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba%280%2c 123%2c 255%2c 1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+    #main-content {
+      padding: 2rem;
+      padding-top: 90px;
+      min-height: calc(100vh - 70px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6c757d;
+      font-size: 1.25rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .card-img-top {
+      height: 200px;
+      object-fit: cover;
+      border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+
+    .category-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #e75101;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    
