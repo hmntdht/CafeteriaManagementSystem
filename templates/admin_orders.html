@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Orders - Nast Eat</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <style>
+    body { background: #f1f3f6; }
+    .order-card { border: 2px solid #ccc; border-radius: 12px; margin-bottom: 20px; padding: 20px; background: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+    .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .order-info { font-size: 0.85rem; color: #555; margin-bottom: 5px; }
+    .order-items li { font-size: 0.95rem; }
+    .action-buttons button { margin-right: 8px; }
+    .badge { font-size: 0.9rem; padding: 0.5em 0.75em; }
+    .fw-bold.text-end { font-size: 1rem; margin-top: 10px; }
+    s { color: #999; }
+  </style>
+</head>
+<body class="p-4">
+  <div class="container">
+    <h2 class="mb-4">All Orders</h2>
+    <div id="orders-container"></div>
+  </div>
+
+  <script>
+    let currentOrders = {}; // Track currently displayed orders
+
+    function renderOrderCard(order) {
+      let itemsHtml = order.items.map(item => {
+        if (item.price_discounted !== item.price) {
+          return `
+            <li class="list-group-item d-flex justify-content-between">
+              <span>${item.name} × ${item.quantity}</span>
+              <span><s>₹${(item.price * item.quantity).toFixed(2)}</s> → <span class="text-success fw-bold">₹${(item.price_discounted * item.quantity).toFixed(2)}</span></span>
+            </li>`;
+        } else {
+          return `
+            <li class="list-group-item d-flex justify-content-between">
+              <span>${item.name} × ${item.quantity}</span>
+              <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+            </li>`;
+        }
+      }).join("");
+
+      let totalHtml = (order.total_discounted !== order.total_original) 
+        ? `Total: <s>₹${order.total_original.toFixed(2)}</s> → <span class="text-success">₹${order.total_discounted.toFixed(2)}</span>`
+        : `Total: ₹${order.total_original.toFixed(2)}`;
+
+      let actionButtons = "";
+      if (order.status === "Pending") {
+        actionButtons = `
+          <button class="btn btn-success btn-sm accept-btn" data-order-id="${order.order_id}">Accept</button>
+          <button class="btn btn-danger btn-sm reject-btn" data-order-id="${order.order_id}">Reject</button>`;
+      } else if (order.status === "Accepted") {
+        actionButtons = `
+          <button class="btn btn-primary btn-sm paid-btn" data-order-id="${order.order_id}">Paid</button>
+          <button class="btn btn-warning btn-sm khata-btn" data-order-id="${order.order_id}">Add to Khata</button>`;
+      }
+
+      return `
+        <div class="order-card" id="order-${order.order_id}">
+          <div class="order-info">
+            <strong>Order #${order.order_id}</strong> | Placed on: ${order.order_date}
+          </div>
+          <div class="order-header">
+            <h5>${order.customer_name}</h5>
+            <div class="action-buttons">${actionButtons}</div>
+          </div>
+          <ul class="list-group order-items mb-2">${itemsHtml}</ul>
+          <p class="fw-bold text-end">${totalHtml}</p>
+        </div>
+      `;
+    }
+
+    function updateOrderCard(order) {
+      let card = $(`#order-${order.order_id}`);
+
+      // Remove card if order is no longer active
+      if (["Rejected", "Paid", "Khata"].includes(order.status)) {
+        if (card.length) card.fadeOut(300, function(){ $(this).remove(); });
+        delete currentOrders[order.order_id];
+        return;
+      }
+
+      // Update existing card
+      if (card.length) {
+        let itemsHtml = order.items.map(item => {
+          if (item.price_discounted !== item.price) {
+            return `<li class="list-group-item d-flex justify-content-between">
+              <span>${item.name} × ${item.quantity}</span>
+              <span><s>₹${(item.price * item.quantity).toFixed(2)}</s> → <span class="text-success fw-bold">₹${(item.price_discounted * item.quantity).toFixed(2)}</span></span>
+            </li>`;
+          } else {
+            return `<li class="list-group-item d-flex justify-content-between">
+              <span>${item.name} × ${item.quantity}</span>
+              <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+            </li>`;
+          }
+        }).join("");
+        card.find(".order-items").html(itemsHtml);
+
+        let totalHtml = (order.total_discounted !== order.total_original) 
+            ? `Total: <s>₹${order.total_original.toFixed(2)}</s> → <span class="text-success">₹${order.total_discounted.toFixed(2)}</span>`
+            : `Total: ₹${order.total_original.toFixed(2)}`;
+        card.find(".fw-bold.text-end").html(totalHtml);
+
+        let actionButtons = "";
+        if (order.status === "Pending") {
+          actionButtons = `
+            <button class="btn btn-success btn-sm accept-btn" data-order-id="${order.order_id}">Accept</button>
+            <button class="btn btn-danger btn-sm reject-btn" data-order-id="${order.order_id}">Reject</button>`;
+        } else if (order.status === "Accepted") {
+          actionButtons = `
+            <button class="btn btn-primary btn-sm paid-btn" data-order-id="${order.order_id}">Paid</button>
+            <button class="btn btn-warning btn-sm khata-btn" data-order-id="${order.order_id}">Add to Khata</button>`;
+        }
+        card.find(".action-buttons").html(actionButtons);
+
+        currentOrders[order.order_id] = order;
+      } else {
+        // Card doesn't exist, create it
+        let cardHtml = renderOrderCard(order);
+        $("#orders-container").append(cardHtml);
+        currentOrders[order.order_id] = order;
+      }
+    }
+
+    function fetchOrders() {
+      $.getJSON("/admin/orders_json", function(data) {
+        data.orders.forEach(updateOrderCard);
+      });
+    }
+
+    setInterval(fetchOrders, 5000);
+    $(document).ready(fetchOrders);
+
+    // Button actions
+    $(document).on("click", ".accept-btn", function() {
+      const orderId = $(this).data("order-id");
+      $.getJSON(`/admin/approve_order/${orderId}`, fetchOrders);
+    });
+
+    $(document).on("click", ".reject-btn", function() {
+      const orderId = $(this).data("order-id");
+      $.getJSON(`/admin/reject_order/${orderId}`, fetchOrders);
+    });
+
+    $(document).on("click", ".paid-btn", function() {
+      const orderId = $(this).data("order-id");
+      $.getJSON(`/admin/pay_order/${orderId}`, fetchOrders);
+    });
+
+    $(document).on("click", ".khata-btn", function() {
+      const orderId = $(this).data("order-id");
+      $.getJSON(`/admin/khata_order/${orderId}`, fetchOrders);
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

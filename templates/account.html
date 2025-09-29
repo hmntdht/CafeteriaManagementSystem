@@ -1,85 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Account | Canteen Management</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="../static/css/styles_account.css">
-</head>
-<body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
-    <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
-        <img src="/static/images/logo.jpeg" alt="Logo" />
-        <span class="ms-2 fw-bold fs-4 text-primary">Nast Eat</span>
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="dashboard.html">Menu Items</a></li>
-          <li class="nav-item"><a class="nav-link" href="category.html">Category</a></li>
-          <li class="nav-item"><a class="nav-link" href="order_items.html">Order Items</a></li>
-          <li class="nav-item"><a class="nav-link" href="history.html">History</a></li>
-          <li class="nav-item"><a class="nav-link active" href="account.html">Account</a></li>
-        </ul>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Account | Canteen Management</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles_account.css') }}"
+    />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+      <div class="container-fluid">
+        <a
+          class="navbar-brand d-flex align-items-center"
+          href="{{ url_for('dashboard') }}"
+        >
+          <img src="/static/images/logo.jpeg" alt="Logo" />
+          <span class="ms-2 fw-bold fs-4 text-primary">Nast Eat</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('dashboard') }}"
+                >Menu Items</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('category') }}">Category</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('order_items') }}"
+                >Order Items</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('history') }}">History</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="{{ url_for('account') }}"
+                >Account</a
+              >
+            </li>
+          </ul>
+        </div>
       </div>
+    </nav>
+
+    <!-- Account Content -->
+    <main id="main-content" class="container mt-5 pt-5">
+      <!-- Flash messages -->
+      <div class="form-container">
+
+    <!-- Toast Container -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="toast align-items-center text-bg-{{ category }} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+              <div class="d-flex">
+                <div class="toast-body">
+                  {{ message }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
     </div>
-  </nav>
-
-  <!-- Account Content -->
-  <main id="main-content">
-    <div class="card p-4">
-      <h2 class="mb-4 text-center">Account Details</h2>
-
-      <p><strong>Name:</strong> <span id="userName">Loading...</span></p>
-      <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
-      <p><strong>Password:</strong> ••••••••</p>
-
-      <hr />
-
-      <h5>Submit Feedback</h5>
-      <textarea class="form-control mb-3" id="feedbackText" rows="4" placeholder="Write your feedback..."></textarea>
-      <button class="btn btn-primary w-100" onclick="submitFeedback()">Submit</button>
-
-      <hr />
-
-      <button class="btn btn-outline-danger w-100" onclick="logout()">Log Out</button>
-    </div>
-    <a href="adminpannel.html">Admin Panel ma jaane</a>
-  </main>
 
 
+      <!-- User Account Details -->
+              
+        <!-- User Account Details -->
+        <div class="card p-4 mb-4">
+          <h2 class="mb-4 text-center">Account Details</h2>
+          <p><strong>Name:</strong> {{ user.name if user else 'N/A' }}</p>
+          <p><strong>Email:</strong> {{ user.email if user else 'N/A' }}</p>
+          <p><strong>Khata:</strong> Rs {{ "%.2f"|format(khata_amount) }}</p>
+          <p>
+            <a href="{{ url_for('forgot_password') }}" class="btn btn-outline-primary">
+              Change Password
+            </a>
+          </p>
+        </div>
 
-  <script>
-    // Replace these with real API calls to your backend for dynamic data
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("userName").innerText = "Hemant Chaudhary";
-      document.getElementById("userEmail").innerText = "hemant@nast.edu.np";
-      document.getElementById("paymentDue").innerText = "Rs. 100000";
-    });
 
-    function submitFeedback() {
-      const text = document.getElementById("feedbackText").value;
-      if (!text.trim()) {
-        alert("Feedback cannot be empty.");
-        return;
-      }
-      // Send feedback to backend here via fetch/ajax
-      alert("Feedback submitted. Thank you!");
-      document.getElementById("feedbackText").value = "";
-    }
+      <!-- Logout -->
+      <div class="card p-4">
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger w-100"
+          >Log Out</a
+        >
+      </div>
 
-    function logout() {
-      // Implement logout logic
-      alert("Logging out...");
-      window.location.href = "login.html";
-    }
-  </script>
+      <div class="card p-4 mb-4">
+        Have suggestions? <a href="/feedback">Send Feedback</a>
+      </div>
+    </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script> // Toast Initialization
+      document.addEventListener("DOMContentLoaded", function () {
+        var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+        toastElList.map(function (toastEl) {
+          var bsToast = new bootstrap.Toast(toastEl, { delay: 3000 }); // auto-hide after 3 sec
+          bsToast.show();
+        });
+      });
+      </script>
+  </body>
 </html>

@@ -1,233 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Category - Nast Eat</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="../static/css/styles.css">
-</head>
-<body>
-
-<nav class="navbar navbar-expand-lg navbar-custom fixed-top">
-  <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="category.html">
-      <img src="/static/images/logo.jpeg" alt="Logo" />
-      <span class="ms-2 fw-bold fs-4 text-primary">Nast Eat</span>
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <form class="d-flex" role="search" onsubmit="return false;">
-            <input class="form-control me-2" type="search" placeholder="Search food..." aria-label="Search" id="searchInput" oninput="filterMenu()">
-          </form>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="dashboard.html">Menu Items</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" href="category.html">Category</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="order_items.html">Order Items</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="history.html">History</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="account.html">Account</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<main class="container pt-5 mt-5">
-
-  <!-- BREAKFAST -->
-  <div class="category-title">Breakfast</div>
-  <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
-    <!-- chana_anda -->
-    <div class="col" data-name="chana anda">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/chana_anda.jpeg" class="card-img-top" alt="Chana Anda">
-        <div class="card-body text-center">
-          <h5 class="card-title">Chana Anda</h5>
-          <p class="card-text">Rs. 40</p>
-          <a href="order_items.html?item=Chana%20anda&price=40" class="btn btn-primary">Order</a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Category - Nast Eat</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+  </head>
+  <body>
+     <div class="form-container">
+      <!-- Toast Container -->
+      <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="toast align-items-center text-bg-{{ category }} border-0 mb-2"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button
+              type="button"
+              class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
+      </div>
+      
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+      <div class="container-fluid">
+        <a
+          class="navbar-brand d-flex align-items-center"
+          href="{{ url_for('dashboard') }}"
+        >
+          <img src="/static/images/logo.jpeg" alt="Logo" />
+          <span class="ms-2 fw-bold fs-4 text-primary">Nast Eat</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('dashboard') }}"
+                >Menu Items</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="{{ url_for('category') }}"
+                >Category</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('order_items') }}"
+                >Order Items</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('history') }}">History</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('account') }}">Account</a>
+            </li>
+          </ul>
         </div>
       </div>
-    </div>
+    </nav>
 
-    <!-- chana -->
-    <div class="col" data-name="chana">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/chana.jpeg" class="card-img-top" alt="Chana">
-        <div class="card-body text-center">
-          <h5 class="card-title">Chana</h5>
-          <p class="card-text">Rs. 30</p>
-          <a href="order_items.html?item=Chana&price=30" class="btn btn-primary">Order</a>
+    <main class="container pt-5 mt-5">
+      {% for cat in categories %}
+      <div class="category-title mb-3">{{ cat.name }}</div>
+      <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        {% for item in cat.menu_items %} {% if item.availability %}
+        <div class="col" data-name="{{ item.name }}">
+          <div class="card h-100 shadow-sm">
+            {% if item.image_url %}
+            <img
+              src="{{ url_for('static', filename=item.image_url) }}"
+              class="card-img-top"
+              alt="{{ item.name }}"
+            />
+            {% else %}
+            <img
+              src="{{ url_for('static', filename='images/default_food.jpeg') }}"
+              class="card-img-top"
+              alt="{{ item.name }}"
+            />
+            {% endif %}
+            <div class="card-body text-center">
+              <h5 class="card-title">{{ item.name }}</h5>
+              <p class="card-text">Rs. {{ item.price }}</p>
+              <a
+                href="{{ url_for('add_to_order') }}?item={{ item.name }}&price={{ item.price }}"
+                class="btn btn-primary"
+                >Order</a
+              >
+            </div>
+          </div>
         </div>
+        {% endif %} {% endfor %}
       </div>
-    </div>
+      {% endfor %}
+    </main>
 
-    <!-- chowmin -->
-    <div class="col" data-name="chaomin">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/chaomin.jpeg" class="card-img-top" alt="Chaomin">
-        <div class="card-body text-center">
-          <h5 class="card-title">Chaomin</h5>
-          <p class="card-text">Rs. 70</p>
-          <a href="order_items.html?item=chaomin&price=70" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      //initialization of tosters
+      document.addEventListener("DOMContentLoaded", function () {
+        var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+        toastElList.map(function (toastEl) {
+          var bsToast = new bootstrap.Toast(toastEl, { delay: 3000 }); // auto-hide after 3 sec
+          bsToast.show();
+        });
+      });
+    </script>
+    <script>
+  // Save scroll position before leaving the page
+  window.addEventListener("beforeunload", function () {
+    localStorage.setItem("scrollPos", window.scrollY);
+  });
 
-    <!-- chola samosa -->
-    <div class="col" data-name="chola samosa">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/chola.jpeg" class="card-img-top" alt="Chola Samosa">
-        <div class="card-body text-center">
-          <h5 class="card-title">Chola Samosa</h5>
-          <p class="card-text">Rs. 50</p>
-          <a href="order_items.html?item=Chola%20Samosa&price=50" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
+      // Restore scroll position when page reloads
+      window.addEventListener("load", function () {
+        const scrollPos = localStorage.getItem("scrollPos");
+        if (scrollPos !== null) {
+          window.scrollTo(0, scrollPos);
+          localStorage.removeItem("scrollPos"); // clear after use
+        }
+      });
+    </script>
 
-    <!-- pakoda -->
-    <div class="col" data-name="pakoda">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/pakoda.jpeg" class="card-img-top" alt="Pakoda">
-        <div class="card-body text-center">
-          <h5 class="card-title">Pakoda</h5>
-          <p class="card-text">Rs. 30/Plate</p>
-          <a href="order_items.html?item=Pakoda&price=30" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- samosa -->
-    <div class="col" data-name="samosa">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/samosa.jpeg" class="card-img-top" alt="Samosa">
-        <div class="card-body text-center">
-          <h5 class="card-title">Samosa</h5>
-          <p class="card-text">Rs. 25</p>
-          <a href="order_items.html?item=Samosa&price=25" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LUNCH -->
-  <div class="category-title">Lunch</div>
-  <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
-    <!-- khana -->
-    <div class="col" data-name="khana">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/khana.jpeg" class="card-img-top" alt="Khana">
-        <div class="card-body text-center">
-          <h5 class="card-title">Khana</h5>
-          <p class="card-text">Rs. 100</p>
-          <a href="order_items.html?item=Khana&price=100" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- momo -->
-    <div class="col" data-name="momo">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/momo.jpeg" class="card-img-top" alt="Momo">
-        <div class="card-body text-center">
-          <h5 class="card-title">Momo</h5>
-          <p class="card-text">Rs. 130</p>
-          <a href="order_items.html?item=momo&price=130" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BEVERAGE -->
-  <div class="category-title">Beverage</div>
-  <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
-    <!-- milk tea -->
-    <div class="col" data-name="milk tea">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/chiya.jpeg" class="card-img-top" alt="Milk Tea">
-        <div class="card-body text-center">
-          <h5 class="card-title">Milk Tea</h5>
-          <p class="card-text">Rs. 20</p>
-          <a href="order_items.html?item=milktea&price=20" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- lemon tea -->
-    <div class="col" data-name="lemon tea">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/lemon_chiya.jpeg" class="card-img-top" alt="Lemon Tea">
-        <div class="card-body text-center">
-          <h5 class="card-title">Lemon Tea</h5>
-          <p class="card-text">Rs. 15</p>
-          <a href="order_items.html?item=lemontea&price=20" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- coke -->
-    <div class="col" data-name="coke">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/coke.jpeg" class="card-img-top" alt="Coke">
-        <div class="card-body text-center">
-          <h5 class="card-title">Coke</h5>
-          <p class="card-text">Rs. 70</p>
-          <a href="order_items.html?item=coke&price=20" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- sprite -->
-    <div class="col" data-name="sprite">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/sprite.jpeg" class="card-img-top" alt="Sprite">
-        <div class="card-body text-center">
-          <h5 class="card-title">Sprite</h5>
-          <p class="card-text">Rs. 70</p>
-          <a href="order_items.html?item=sprite&price=20" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- water -->
-    <div class="col" data-name="water">
-      <div class="card h-100 shadow-sm">
-        <img src="/static/images/pani.jpeg" class="card-img-top" alt="Water">
-        <div class="card-body text-center">
-          <h5 class="card-title">Water</h5>
-          <p class="card-text">Rs. 20</p>
-          <a href="order_items.html?item=water&price=20" class="btn btn-primary">Order</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</main>
-
-<script>
-  function filterMenu() {
-    const input = document.getElementById('searchInput').value.toLowerCase();
-    const items = document.querySelectorAll('.row .col');
-    items.forEach(item => {
-      const name = item.getAttribute('data-name').toLowerCase();
-      item.style.display = name.includes(input) ? 'block' : 'none';
-    });
-  }
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+  </body>
 </html>

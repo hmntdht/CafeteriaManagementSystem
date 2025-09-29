@@ -62,4 +62,12 @@ body, html {
       border-bottom: 2px solid #dee2e6;
     }
 
-    
+    #main-content-history {
+      padding: 2rem;
+      padding-top: 90px;
+      min-height: calc(100vh - 70px);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .card {
+      margin-bottom: 1.5rem;
+    }

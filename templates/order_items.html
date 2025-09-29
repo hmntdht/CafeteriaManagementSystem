@@ -3,15 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Order Items</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="../static/css/styles_order.css">
+  <title>Order Items | Nast Eat</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_order.css') }}"/>
 </head>
 <body>
+  <!-- Toast Container -->
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="toast align-items-center text-bg-{{ category }} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+              <div class="toast-body">{{ message }}</div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
 
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
+      <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') }}">
         <img src="/static/images/logo.jpeg" alt="Logo" />
         <span class="ms-2 fw-bold fs-4 text-primary">Nast Eat</span>
       </a>
@@ -20,108 +36,79 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="dashboard.html">Menu Items</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="category.html">Category</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="order_items.html">Order Items</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="history.html">History</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="account.html">Account</a>
-          </li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Menu Items</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('category') }}">Category</a></li>
+          <li class="nav-item"><a class="nav-link active" href="{{ url_for('order_items') }}">Order Items</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('history') }}">History</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('account') }}">Account</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <main id="main-content">
+  <main id="main-content" class="container mt-5 pt-5">
     <div class="order-container">
       <div class="order-title">Your Order</div>
+
+      {% if order %}
       <ul id="order-list" class="list-group mb-3">
-        <!-- Items will be injected here -->
+        {% for item in order %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ item.name }} × {{ item.quantity }} — Rs. {{ item.price * item.quantity }}</span>
+          <div>
+            <a href="{{ url_for('update_order', item_name=item.name, change=-1) }}" class="btn btn-outline-secondary btn-sm">−</a>
+            <a href="{{ url_for('update_order', item_name=item.name, change=1) }}" class="btn btn-outline-secondary btn-sm">+</a>
+          </div>
+        </li>
+        {% endfor %}
       </ul>
+
+      <!-- Discount Section -->
+                <div class="card shadow-sm mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Apply Discount</h5>
+
+              {% if discount_applied %}
+                <p class="text-muted"><del>Original Total: Rs. {{ total }}</del></p>
+                <p class="text-success fw-bold fs-5">
+                  Discount applied! You saved Rs. {{ discount_amount }} ({{ session['discount_percentage'] }}% off)
+                </p>
+                <h5>Total after discount: Rs. {{ total_after_discount }}</h5>
+              {% else %}
+                <form action="{{ url_for('apply_discount') }}" method="POST" class="d-flex gap-2">
+                  <input type="text" class="form-control" id="discount_code" name="discount_code"
+                        placeholder="Enter discount code" required>
+                  <button type="submit" class="btn btn-success">Apply</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+
+
+      <!-- Total and Checkout -->
+      {% set final_total = total_after_discount if discount_applied else total %}
       <div class="d-flex justify-content-between align-items-center mt-3">
-        <div id="total-amount" class="total-section">Total: Rs. 0</div>
-        <button id="checkout-btn" class="btn btn-success ms-3" onclick="checkout()" disabled>Checkout</button>
+        <div id="total-amount" class="total-section">
+          <strong>Total: Rs. {{ final_total }}</strong>
+        </div>
+        <a href="{{ url_for('checkout') }}" class="btn btn-success ms-3 {% if final_total <= 0 %}disabled{% endif %}">Checkout</a>
       </div>
+
+      {% else %}
+      <p>No items in your order. Add something from the menu!</p>
+      {% endif %}
     </div>
   </main>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const item = urlParams.get('item');
-    const price = parseFloat(urlParams.get('price'));
-
-    let orders = JSON.parse(localStorage.getItem('orders')) || [];
-
-    // Add new item if passed from query
-    if (item && !isNaN(price)) {
-      const existingIndex = orders.findIndex(order => order.item === item);
-      if (existingIndex > -1) {
-        orders[existingIndex].quantity = (orders[existingIndex].quantity || 1) + 1;
-      } else {
-        orders.push({ item, price, quantity: 1 });
-      }
-      localStorage.setItem('orders', JSON.stringify(orders));
-    }
-
-    function renderOrders() {
-      const orderList = document.getElementById('order-list');
-      const totalAmountEl = document.getElementById('total-amount');
-      const checkoutBtn = document.getElementById('checkout-btn');
-
-      orderList.innerHTML = '';
-      let total = 0;
-
-      orders.forEach((order, index) => {
-        order.quantity = parseInt(order.quantity) || 1;
-        order.price = parseFloat(order.price) || 0;
-
-        total += order.price * order.quantity;
-
-        const li = document.createElement('li');
-        li.className = 'list-group-item order-item';
-        li.innerHTML = `
-          <span>${order.item} - Rs. ${order.price}</span>
-          <div class="qty-controls">
-            <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, -1)">−</button>
-            <span>${order.quantity}</span>
-            <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, 1)">+</button>
-          </div>
-        `;
-        orderList.appendChild(li);
-      });
-
-      totalAmountEl.textContent = `Total: Rs. ${total}`;
-      checkoutBtn.disabled = orders.length === 0;
-    }
-
-    function updateQuantity(index, change) {
-      orders[index].quantity += change;
-      if (orders[index].quantity <= 0) {
-        orders.splice(index, 1); // remove item
-      }
-      localStorage.setItem('orders', JSON.stringify(orders));
-      renderOrders();
-    }
-
-    function checkout() {
-      if (orders.length === 0) return;
-      alert('✅ Thank you for your order!\nRedirecting to payment...');
-      localStorage.removeItem('orders');
-      orders = [];
-      renderOrders();
-    }
-
-    renderOrders();
-  </script>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+      toastElList.map(function (toastEl) {
+        var bsToast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        bsToast.show();
+      });
+    });
+  </script>
 </body>
 </html>

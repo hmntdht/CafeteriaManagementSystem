@@ -1,0 +1,47 @@
+{% if orders %}
+  <table id="orders-table" class="table table-hover">
+    <thead>
+      <tr>
+        <th></th> <!-- Expand icon -->
+        <th>Order #</th>
+        <th>Customer</th>
+        <th class="sortable" data-sort="total_amount">Total Amount (Rs.) &#x2195;</th>
+        <th class="sortable" data-sort="order_date">Order Date &#x2195;</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="orders-tbody">
+      {% for order in orders %}
+        <tr class="order-row {% if order.status=='Paid' %}paid-row{% elif order.status=='Khata' %}khata-row{% endif %}">
+          <td class="expand-toggle" style="cursor:pointer;">&#9654;</td>
+          <td>{{ order.id }}</td>
+          <td>{{ order.user.name }}</td>
+          <td>{{ order.total_amount }}</td>
+          <td>{{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>
+            {% if order.status == 'Paid' %}
+              <span class="badge bg-success">Paid</span>
+            {% elif order.status == 'Khata' %}
+              <span class="badge bg-warning text-dark">Khata</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ order.status }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr class="order-details-row" style="display:none;">
+          <td colspan="6">
+            <ul class="list-group mb-0">
+              {% for item in order.order_items %}
+                <li class="list-group-item">
+                  {{ item.menu_item.name }} × {{ item.quantity }} — Rs. {{ item.rate * item.quantity }}
+                </li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No orders found for the selected filters.</p>
+{% endif %}

@@ -1,0 +1,78 @@
+
+/* this is css for the login , otp , signup */
+
+
+body {
+      background: linear-gradient(to bottom right, #f0f2f5, #ffffff);
+      display: flex;
+      align-items:center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+    }
+
+    .form-container {
+      background-color: #fff;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .form-container h2 {
+      margin-bottom: 25px;
+      font-weight: 600;
+      color: #333;
+      text-align: center;
+    }
+
+    .form-control {
+      border-radius: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      border: none;
+      border-radius: 25px;
+      font-weight: 500;
+      transition: 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0056b3, #004494);
+      transform: translateY(-1px);
+    }
+
+    .btn-link {
+      color: #007bff;
+      font-weight: 500;
+      text-decoration: none;
+      padding: 0;
+    }
+
+    .btn-link:hover {
+      text-decoration: underline;
+      color: #0056b3;
+    }
+
+    .form-text {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.95rem;
+    }
+
+    .form-text a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .form-text a:hover {
+      text-decoration: underline;
+    }
+
+    .error {
+  color: red;
+  font-size: 0.9em;
+}

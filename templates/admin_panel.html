@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nast Eat Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container-fluid mt-4">
+    <div class="container">
+      <!-- Toast Container -->
+      <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="toast align-items-center text-bg-{{ category }} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                  <div class="toast-body">{{ message }}</div>
+                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <h2 class="text-center mb-4">Nast Eat - Admin Panel</h2>
+
+      <!-- Dashboard Section -->
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card text-bg-primary">
+            <div class="card-body">
+              <h5 class="card-title">Total Orders Today</h5>
+              <p class="card-text" id="orders-today">{{ orders_today }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-bg-success">
+            <div class="card-body">
+              <h5 class="card-title">Total Orders This Week</h5>
+              <p class="card-text" id="orders-week">{{ orders_week }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-bg-warning">
+            <div class="card-body">
+              <h5 class="card-title">Best Selling Item</h5>
+              <p class="card-text" id="best-item">{{ best_item }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-bg-info">
+            <div class="card-body">
+              <h5 class="card-title">Total Users</h5>
+              <p class="card-text" id="logged-users">{{ logged_users }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coupons Available -->
+      <h5 class="mt-4">Coupons Available</h5>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Percentage</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for coupon in coupons %}
+          <tr>
+            <td>{{ coupon.code }}</td>
+            <td>{{ coupon.amount }}%</td>
+            <td>{{ coupon.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ coupon.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+              {% if coupon.end_time < now %}
+                Expired
+              {% else %}
+                Active
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Food Availability Section -->
+      <div class="mb-4">
+      <h4>Manage Food Availability</h4>
+
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Status</th>
+              <th>Toggle Availability</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr class="toggle-row {% if loop.index > 5 %}d-none extra{% endif %}" data-group="food">
+              <td>{{ item.name }}</td>
+              <td>
+                <span class="badge {% if item.availability %}bg-success{% else %}bg-danger{% endif %}">
+                  {% if item.availability %}Available{% else %}Not Available{% endif %}
+                </span>
+              </td>
+              <td>
+                <a href="{{ url_for('toggle_item', item_id=item.id) }}"
+                  class="btn btn-sm {% if item.availability %}btn-danger{% else %}btn-success{% endif %}">
+                  {% if item.availability %}Mark Not Available{% else %}Mark Available{% endif %}
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% if items|length > 5 %}
+        <button class="btn btn-link p-0 toggle-btn" data-target="food">Show More</button>
+        {% endif %}
+      </div>
+
+
+    <!-- Add New Menu Item -->
+    <div class="card shadow-sm mb-3 p-3" style="max-width: 600px;">
+      <h5 class="mb-3">Add New Menu Item</h5>
+      <form action="{{ url_for('add_item') }}" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-end">
+        <input type="text" class="form-control form-control-sm flex-grow-1" name="name" placeholder="Item Name" required>
+        <input type="number" class="form-control form-control-sm" name="price" placeholder="Price" required>
+        <select name="category" class="form-select form-select-sm" required>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+        <input type="file" class="form-control form-control-sm" name="image" accept="image/*">
+        <button type="submit" class="btn btn-primary btn-sm">Add</button>
+      </form>
+    </div>
+
+      <!-- Order management section -->
+      <div class="mb-4">
+        <h4>Manage Orders</h4>
+        <a href="{{ url_for('admin_orders') }}" class="btn btn-primary">Manage Orders</a>
+      </div>
+
+      <!-- Admin History section -->
+      <div class="mb-4">
+        <h4>History</h4>
+        <a href="{{ url_for('admin_history') }}" class="btn btn-primary">Show History</a>
+      </div>
+      <!-- Admin History section -->
+      <div class="mb-4">
+        <h4>Khata Management</h4>
+        <a href="{{ url_for('admin_khata') }}" class="btn btn-primary">Khata Management</a>
+      </div>
+
+
+      <!-- Discount Coupon Generator (Percentage-based) -->
+              
+        <div class="card shadow-sm mb-3 p-3" style="max-width: 600px;">
+          <h5 class="mb-3">Generate Discount Coupon</h5>
+
+          <form action="/admin/create_discount" method="POST" class="d-flex flex-column gap-2">
+            <input type="text" class="form-control form-control-sm" name="code" placeholder="Coupon code" required>
+            <input type="number" class="form-control form-control-sm" name="amount" placeholder="Discount %"
+                  step="0.01" min="0" max="100" required>
+            <input type="datetime-local" class="form-control form-control-sm" name="start_time" required>
+            <input type="datetime-local" class="form-control form-control-sm" name="end_time" required>
+            <button type="submit" class="btn btn-primary btn-sm mt-2">Create</button>
+          </form>
+
+          {% if success %}
+            <p class="mt-2 mb-0 text-success small">{{ success }}</p>
+          {% endif %}
+          {% if error %}
+            <p class="mt-2 mb-0 text-danger small">{{ error }}</p>
+          {% endif %}
+        </div>
+
+     <!-- User Management Section -->
+      <div class="mb-4">
+        <h4>Registered Users</h4>
+
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+            <tr class="toggle-row {% if loop.index > 5 %}d-none extra{% endif %}" data-group="users">
+              <td>{{ u.name }}</td>
+              <td>{{ u.email }}</td>
+              <td>
+                {% if u.is_banned %}
+                  <span class="badge bg-danger">Banned</span>
+                {% else %}
+                  <span class="badge bg-success">Active</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if u.is_banned %}
+                  <a href="{{ url_for('unban_user', user_id=u.id) }}" class="btn btn-sm btn-success">Unban</a>
+                {% else %}
+                  <a href="{{ url_for('ban_user', user_id=u.id) }}" class="btn btn-sm btn-warning">Ban</a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% if users|length > 5 %}
+        <button class="btn btn-link p-0 toggle-btn" data-target="users">Show More</button>
+        {% endif %}
+        </div>
+      <!-- Logout Button -->
+      <div class="mb-4">
+        <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-danger">Log Out</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+        // show more show less logic 
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const group = btn.getAttribute('data-target');
+          const rows = document.querySelectorAll(`.toggle-row[data-group="${group}"]`);
+          rows.forEach(row => {
+            if (row.classList.contains('extra')) {
+              row.classList.toggle('d-none');
+            }
+          });
+          btn.textContent = btn.textContent === 'Show More' ? 'Show Less' : 'Show More';
+        });
+      });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+      toastElList.map(function (toastEl) {
+        var bsToast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        bsToast.show();
+      });
+    });
+  </script>
+</body>
+</html>
