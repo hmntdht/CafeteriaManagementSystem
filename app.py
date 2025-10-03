@@ -36,6 +36,8 @@ def allowed_file(filename):
 #     )
 #     db.session.add(admin)
 #     db.session.commit()
+
+
 # with app.app_context():
 #     default_categories = [
 #         {"id": 101, "name": "Breakfast"},
@@ -505,65 +507,64 @@ def checkout():
     # Render waiting page
     return render_template("order_wait.html", customer_name=customer_name)
 
-
 # ---------------- ORDER STATUS API ----------------
 @app.route("/order_status/<int:user_id>")
 def order_status(user_id):
     user = User.query.get(user_id)
     if not user:
-        return jsonify({"order": None})
+        return jsonify({"orders": []})
 
-    # Get latest order
-    latest_order = (
-        Order.query.filter_by(user_id=user_id)
+    # Fetch all active orders (exclude Paid, Khata, Rejected)
+    active_orders = (
+        Order.query.filter(
+            Order.user_id == user_id,
+            ~Order.status.in_(["Paid", "Khata", "Rejected", "Settlement"])
+        )
         .order_by(Order.order_date.desc())
-        .first()
+        .all()
     )
-    if not latest_order:
-        return jsonify({"order": None})
 
-    # Get payment info
-    payment = Payment.query.filter_by(order_id=latest_order.id).first()
-    discount_amount = float(payment.discount) if payment else 0
+    response_orders = []
+    for order in active_orders:
+        # Payment info
+        payment = Payment.query.filter_by(order_id=order.id).first()
+        discount_amount = float(payment.discount) if payment else 0
 
-    # Prepare items and total
-    order_items = [oi for oi in latest_order.order_items if oi.menu_item]
-    total_original = sum(float(oi.rate) * oi.quantity for oi in order_items)
+        # Items
+        order_items = [oi for oi in order.order_items if oi.menu_item]
+        total_original = sum(float(oi.rate) * oi.quantity for oi in order_items)
+        total_discounted = total_original - discount_amount if discount_amount > 0 else total_original
 
-    items_list = []
-    for oi in order_items:
-        price = float(oi.rate)
-        quantity = oi.quantity
+        items_list = []
+        for oi in order_items:
+            price = float(oi.rate)
+            quantity = oi.quantity
 
-        if total_original > 0 and discount_amount > 0:
-            # Calculate proportional discount per item
-            proportion = (price * quantity) / total_original
-            discounted_price = price - (discount_amount * proportion / quantity)
-        else:
-            discounted_price = price
+            if total_original > 0 and discount_amount > 0:
+                # proportional discount distribution
+                proportion = (price * quantity) / total_original
+                discounted_price = price - (discount_amount * proportion / quantity)
+            else:
+                discounted_price = price
 
-        items_list.append({
-            "name": oi.menu_item.name,
-            "quantity": quantity,
-            "price": round(price, 2),
-            "discounted_price": round(discounted_price, 2)
+            items_list.append({
+                "name": oi.menu_item.name,
+                "quantity": quantity,
+                "price": round(price, 2),
+                "discounted_price": round(discounted_price, 2)
+            })
+
+        # Build response per order
+        response_orders.append({
+            "order_id": order.id,
+            "order_datetime": order.order_date.strftime("%Y-%m-%d %H:%M"),
+            "items": items_list,
+            "total_original": round(total_original, 2),
+            "total_discounted": round(total_discounted, 2),
+            "status": order.status
         })
 
-    # Total discounted amount
-    total_discounted = total_original - discount_amount if discount_amount > 0 else total_original
-
-    response = {
-        "order_id": latest_order.id,
-        "order_datetime": latest_order.order_date.strftime("%Y-%m-%d %H:%M"),
-        "items": items_list,
-        "total_original": round(total_original, 2),
-        "total_discounted": round(total_discounted, 2),
-        "status": latest_order.status
-    }
-
-    return jsonify({"order": response})
-
-
+    return jsonify({"orders": response_orders})
 
 #admin orders 
 @app.route("/admin/orders")
@@ -1175,6 +1176,7 @@ def admin_history_search():
 
     orders = orders_query.order_by(Order.order_date.desc()).all()
     return render_template('admin_history_list.html', orders=orders)
+
 
 
 # ---------------- LOGOUT ----------------
