@@ -13,22 +13,13 @@
     <h2>Hello, {{ customer_name }}</h2>
 
     <p id="status-text" class="mb-3">
-      Your order is being processed. Current status:
-      <span id="status" class="fw-bold text-primary">Pending</span>
+      Your active orders are listed below:
     </p>
-
-      <div id="loading-message" class="mb-3">
-      <p>Waiting for confirmation...</p>
-    </div>
-
 
     <div id="orders-container" class="mt-4 text-start"></div>
 
-    <div id="rejected-message" style="display: none" class="alert alert-danger mt-4">
-      Sorry, your order was rejected.
-      <div class="mt-3 text-center">
-        <a href="{{ url_for('dashboard') }}" class="btn btn-danger">Place New Order</a>
-      </div>
+    <div id="no-orders-message" style="display: none" class="alert alert-info mt-4">
+      You have no active orders right now.
     </div>
   </div>
 
@@ -36,81 +27,93 @@
     const qrUrl = "/static/images/QR.jpeg"; // QR code path
     const dashboardUrl = "{{ url_for('dashboard') }}";
     let stopPolling = false;
-function formatPrice(price) {
-  // Round to 2 decimal places and add currency symbol
-  return "रु" + price.toFixed(2);
-}
 
-function buildOrderCard(order) {
-  const itemsHtml = order.items.map(item => {
-    const discountedTotal = item.discounted_price * item.quantity;
-    const originalTotal = item.price * item.quantity;
-    const hasDiscount = Math.abs(discountedTotal - originalTotal) > 0.01;
+    function formatPrice(price) {
+      return "रु" + price.toFixed(2);
+    }
 
-    return `<li class="list-group-item d-flex justify-content-between">
+    function buildOrderCard(order) {
+      let statusClass = "text-primary";
+      if (order.status === "Accepted") statusClass = "text-success";
+      else if (order.status === "Rejected") statusClass = "text-danger";
+
+      // Pending → only status + waiting
+      if (order.status === "Pending") {
+        return `
+          <div class="card mb-4">
+            <div class="card-body">
+              <h4 class="card-title">Order #${order.order_id}</h4>
+              <p><small>Ordered at: ${order.order_datetime}</small></p>
+              <p><strong>Status:</strong> <span class="${statusClass}">${order.status}</span></p>
+              <div class="alert alert-info mt-3">Waiting for confirmation...</div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Accepted → full details + QR
+      if (order.status === "Accepted") {
+        const itemsHtml = order.items.map(item => {
+          const discountedTotal = item.discounted_price * item.quantity;
+          const originalTotal = item.price * item.quantity;
+          const hasDiscount = Math.abs(discountedTotal - originalTotal) > 0.01;
+
+          return `
+            <li class="list-group-item d-flex justify-content-between">
               <span>${item.name} × ${item.quantity}</span>
               <span>
                 ${hasDiscount 
                   ? `<s>${formatPrice(originalTotal)}</s> <span class="text-success fw-bold">${formatPrice(discountedTotal)}</span>` 
                   : formatPrice(originalTotal)}
               </span>
-            </li>`;
-  }).join("");
+            </li>
+          `;
+        }).join("");
 
-  // Calculate totals safely
-  const totalOriginal = order.total_original;
-  const totalDiscounted = order.total_discounted;
-  const hasTotalDiscount = Math.abs(totalDiscounted - totalOriginal) > 0.01;
+        const totalOriginal = order.total_original;
+        const totalDiscounted = order.total_discounted;
+        const hasTotalDiscount = Math.abs(totalDiscounted - totalOriginal) > 0.01;
 
-  const totalHtml = hasTotalDiscount 
-    ? `<s>${formatPrice(totalOriginal)}</s> → <span class="text-success fw-bold">${formatPrice(totalDiscounted)}</span>`
-    : formatPrice(totalDiscounted);
+        const totalHtml = hasTotalDiscount 
+          ? `<s>${formatPrice(totalOriginal)}</s> → <span class="text-success fw-bold">${formatPrice(totalDiscounted)}</span>`
+          : formatPrice(totalDiscounted);
 
-  return `
-    <div class="card mb-4">
-      <div class="card-body">
-        <h4 class="card-title">Order #${order.order_id}</h4>
-        <p><small>Ordered at: ${order.order_datetime}</small></p>
-        <ul class="list-group mb-3">${itemsHtml}</ul>
-        <p><strong>Total:</strong> ${totalHtml}</p>
-        <h6>You Can Pay at the Counter</h6>
-        <h6>Payment QR Code</h6>
-        <img src="${qrUrl}" alt="Scan to pay" class="img-fluid border rounded p-2" style="max-width:200px;">
-        <div class="mt-3 text-center">
-          <a href="${dashboardUrl}" class="btn btn-success">Place New Order</a>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-    function updateStatus(order) {
-      if (!order) {
-        $("#status").text("No active order").removeClass("text-primary text-success text-danger");
-        $("#status-text, #loading-spinner, #orders-container, #rejected-message").hide();
-        stopPolling = true;
-        return;
+        return `
+          <div class="card mb-4">
+            <div class="card-body">
+              <h4 class="card-title">Order #${order.order_id}</h4>
+              <p><small>Ordered at: ${order.order_datetime}</small></p>
+              <p><strong>Status:</strong> <span class="${statusClass}">${order.status}</span></p>
+              <ul class="list-group mb-3">${itemsHtml}</ul>
+              <p><strong>Total:</strong> ${totalHtml}</p>
+              <h6>You Can Pay at the Counter</h6>
+              <h6>Payment QR Code</h6>
+              <img src="${qrUrl}" alt="Scan to pay" class="img-fluid border rounded p-2" style="max-width:200px;">
+              <div class="mt-3 text-center">
+                <a href="${dashboardUrl}" class="btn btn-success">Place New Order</a>
+              </div>
+            </div>
+          </div>
+        `;
       }
 
-      const status = order.status;
-      $("#status-text").show();
-
-      if (status === "Pending") {
-        $("#status").text("Pending").removeClass("text-success text-danger").addClass("text-primary");
-        $("#loading-message").show(); 
-        $("#orders-container, #rejected-message").hide();
-      }
-      else if (status === "Accepted") {
-        $("#status").text("Accepted").removeClass("text-primary text-danger").addClass("text-success");
-        $("#loading-message").hide(); 
-        $("#orders-container").html(buildOrderCard(order)).show();
-        $("#rejected-message").hide();
-      }
-      else if (status === "Rejected") {
-        $("#status").text("Rejected").removeClass("text-primary text-success").addClass("text-danger");
-        $("#loading-spinner, #orders-container").hide();
-        $("#rejected-message").show();
-        stopPolling = true;
+      // Rejected → rejection alert
+      if (order.status === "Rejected") {
+        return `
+          <div class="card mb-4 border-danger">
+            <div class="card-body">
+              <h4 class="card-title">Order #${order.order_id}</h4>
+              <p><small>Ordered at: ${order.order_datetime}</small></p>
+              <p><strong>Status:</strong> <span class="${statusClass}">${order.status}</span></p>
+              <div class="alert alert-danger mt-3">
+                Sorry, your order was rejected.
+              </div>
+              <div class="mt-3 text-center">
+                <a href="${dashboardUrl}" class="btn btn-danger">Place New Order</a>
+              </div>
+            </div>
+          </div>
+        `;
       }
     }
 
@@ -118,13 +121,25 @@ function buildOrderCard(order) {
       if (stopPolling) return;
 
       $.getJSON("/order_status/{{ session['user_id'] }}", function (data) {
-        updateStatus(data.order);
+        $("#orders-container").empty();
+
+        if (!data.orders || data.orders.length === 0) {
+          $("#no-orders-message").show();
+          return;
+        }
+
+        $("#no-orders-message").hide();
+
+        data.orders.forEach(order => {
+          $("#orders-container").append(buildOrderCard(order));
+        });
+
       }).fail(function() {
         console.error("Failed to fetch order status.");
       });
     }
 
-    // Poll every 3 seconds for quicker updates
+    // Poll every 3 seconds
     const pollingInterval = setInterval(checkOrderStatus, 3000);
     checkOrderStatus();
   </script>
