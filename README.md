@@ -1,6 +1,6 @@
 # Nast Eat - Cafeteria Management System
 
-**Nast Eat** is a web-based Cafeteria Management System designed for students and staff to order food online, manage accounts, and streamline cafeteria operations. This project is developed using HTML, CSS, Bootstrap, and Flask (Python) for the backend. It includes features like user authentication, OTP verification, and payment simulation.
+**Nast Eat** is a web-based Cafeteria Management System is designed for students and staff to order food online, manage accounts, and streamline cafeteria operations. This project is developed using HTML, CSS, Bootstrap, and Flask (Python) for the backend. It includes features like user authentication, OTP verification, and payment simulation.
 
 ---
 
