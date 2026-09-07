@@ -64,7 +64,8 @@ cd nast-eat
 
 **Create a virtual environment
 python3 -m venv venv
-source venv/bin/activate   # Linux/Mac
+source venv/bin/activate   # Linux
+source venv/bin/activate  #mac
 venv\Scripts\activate      # Windows
 
 **Install dependencies
